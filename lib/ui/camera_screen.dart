@@ -1,5 +1,7 @@
 import 'package:camera/camera.dart';
+import 'package:dominos_counter/model_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -10,8 +12,10 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen> {
   late List<CameraDescription> cameras;
+  final modelService = ModelService();
   CameraController? controller;
   List predictions = [];
+  late Future<void> loaded;
 
   initCamera() async {
     List<CameraDescription> _cameras = await availableCameras();
@@ -40,6 +44,14 @@ class _CameraScreenState extends State<CameraScreen> {
   void initState() {
     super.initState();
     initCamera();
+    loaded = modelService.loadModel();
+  }
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    modelService.close();
+    super.dispose();
   }
 
   @override
@@ -55,14 +67,31 @@ class _CameraScreenState extends State<CameraScreen> {
           ),
           Expanded(
             flex: 1,
-            child: ListView.separated(
-              itemBuilder: (context, index) {
-                return Text(predictions[index]);
-              },
-              separatorBuilder: (context, index) {
-                return SizedBox(height: 12);
-              },
-              itemCount: predictions.length,
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView.separated(
+                    itemBuilder: (context, index) {
+                      return Text(predictions[index]);
+                    },
+                    separatorBuilder: (context, index) {
+                      return SizedBox(height: 12);
+                    },
+                    itemCount: predictions.length,
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    await loaded;
+                    var input = (await rootBundle.load(
+                      'assets/images/test1.jpeg',
+                    )).buffer.asUint8List();
+
+                    modelService.runModel(input);
+                  },
+                  child: Text('Run Model'),
+                ),
+              ],
             ),
           ),
         ],

@@ -16,7 +16,7 @@ void main() {
 
     final modelService = ModelService();
     await modelService.loadModel();
-    print(modelService.runModel(input, output));
+    print(modelService.runModel(input));
     print(output);
   });
 }
