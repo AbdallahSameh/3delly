@@ -6,9 +6,10 @@ plugins {
 }
 
 android {
+    compileSdk = 36
+    ndkVersion = "28.2.13676358"
     namespace = "com.example.dominos_counter"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

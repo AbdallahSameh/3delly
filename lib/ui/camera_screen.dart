@@ -1,7 +1,10 @@
 import 'package:camera/camera.dart';
 import 'package:dominos_counter/model_service.dart';
+import 'package:dominos_counter/yolo_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:ultralytics_yolo/ultralytics_yolo.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -14,7 +17,7 @@ class _CameraScreenState extends State<CameraScreen> {
   late List<CameraDescription> cameras;
   final modelService = ModelService();
   CameraController? controller;
-  List predictions = [];
+  List<YOLOResult> predictions = [];
   late Future<void> loaded;
 
   initCamera() async {
@@ -43,6 +46,8 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void initState() {
     super.initState();
+    WakelockPlus.enable();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     initCamera();
     loaded = modelService.loadModel();
   }
@@ -51,6 +56,8 @@ class _CameraScreenState extends State<CameraScreen> {
   void dispose() {
     controller?.dispose();
     modelService.close();
+    WakelockPlus.disable();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
   }
 
@@ -61,9 +68,20 @@ class _CameraScreenState extends State<CameraScreen> {
         children: [
           Expanded(
             flex: 4,
-            child: controller == null || !controller!.value.isInitialized
-                ? Center(child: CircularProgressIndicator())
-                : CameraPreview(controller!),
+            // child: controller == null || !controller!.value.isInitialized
+            //     ? Center(child: CircularProgressIndicator())
+            //     : CameraPreview(controller!),
+            child: YoloService(
+              onResult: (result) {
+                setState(() {
+                  predictions = result;
+                });
+                print('Found ${predictions.length} objects!');
+                for (final result in predictions) {
+                  print('${result.className}: ${result.confidence}');
+                }
+              },
+            ),
           ),
           Expanded(
             flex: 1,
@@ -72,7 +90,9 @@ class _CameraScreenState extends State<CameraScreen> {
                 Expanded(
                   child: ListView.separated(
                     itemBuilder: (context, index) {
-                      return Text(predictions[index]);
+                      return Text(
+                        '${predictions[index].className}: ${predictions[index].confidence}',
+                      );
                     },
                     separatorBuilder: (context, index) {
                       return SizedBox(height: 12);
@@ -82,12 +102,16 @@ class _CameraScreenState extends State<CameraScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    await loaded;
-                    var input = (await rootBundle.load(
-                      'assets/images/test1.jpeg',
-                    )).buffer.asUint8List();
+                    // await loaded;
+                    // var input = (await rootBundle.load(
+                    //   'assets/images/test1.jpeg',
+                    // )).buffer.asUint8List();
 
-                    modelService.runModel(input);
+                    // modelService.runModel(input);
+                    print('Found ${predictions.length} objects!');
+                    for (final result in predictions) {
+                      print('${result.className}: ${result.confidence}');
+                    }
                   },
                   child: Text('Run Model'),
                 ),
