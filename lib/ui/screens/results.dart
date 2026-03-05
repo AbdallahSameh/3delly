@@ -10,13 +10,11 @@ class Results extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Stack(
-        children: [
-          Image.file(File(image.path), fit: BoxFit.fill),
-          CustomPaint(size: Size.infinite, painter: painter),
-        ],
-      ),
+    return Stack(
+      children: [
+        SizedBox.expand(child: Image.file(File(image.path), fit: BoxFit.fill)),
+        CustomPaint(size: Size.infinite, painter: painter),
+      ],
     );
   }
 }

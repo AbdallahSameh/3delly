@@ -17,8 +17,11 @@ class _CameraScreenState extends State<CameraScreen> {
   late List<CameraDescription> cameras;
   CameraController? controller;
   late YoloService yoloService;
-  late final initialized;
+  late final Future<void> initialized;
   List<Map<String, dynamic>> predictions = [];
+  bool cameraOn = true;
+  var input;
+  late final Size previewSize;
 
   initCamera() async {
     List<CameraDescription> _cameras = await availableCameras();
@@ -64,57 +67,57 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            flex: 4,
-            child: controller == null || !controller!.value.isInitialized
-                ? Center(child: CircularProgressIndicator())
-                : CameraPreview(controller!),
-          ),
-          Expanded(
-            flex: 1,
-            child: Column(
-              children: [
-                Expanded(child: Text('Count: ${predictions.length}')),
-                ElevatedButton(
-                  onPressed: () async {
-                    await initialized;
-                    var input = await controller!.takePicture();
-
-                    final results = await yoloService.detectObjects(
-                      await input.readAsBytes(),
-                    );
-
-                    yoloService.boundingBoxes(results);
-                    setState(() {
-                      predictions = results;
-                    });
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) {
-                          final previewSize = Size(
-                            controller!.value.previewSize!.height,
-                            controller!.value.previewSize!.width,
-                          );
-                          return Results(
-                            image: input,
-                            painter: BoundingBoxesPaint(
-                              boxes: predictions,
-                              previewSize: previewSize,
-                            ),
-                          );
-                        },
+      appBar: AppBar(),
+      drawer: Drawer(),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              flex: 4,
+              child: controller == null || !controller!.value.isInitialized
+                  ? Center(child: CircularProgressIndicator())
+                  : cameraOn
+                  ? CameraPreview(controller!)
+                  : Results(
+                      image: input,
+                      painter: BoundingBoxesPaint(
+                        boxes: predictions,
+                        previewSize: previewSize,
                       ),
-                    );
-                  },
-                  child: Text('Run Model'),
-                ),
-              ],
+                    ),
             ),
-          ),
-        ],
+            Expanded(
+              flex: 1,
+              child: Column(
+                children: [
+                  Expanded(child: Text('Count: ${predictions.length}')),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await initialized;
+                      previewSize = Size(
+                        controller!.value.previewSize!.height,
+                        controller!.value.previewSize!.width,
+                      );
+                      input = await controller!.takePicture();
+
+                      final results = await yoloService.detectObjects(
+                        await input.readAsBytes(),
+                      );
+
+                      yoloService.boundingBoxes(results);
+                      setState(() {
+                        predictions = results;
+                      });
+
+                      cameraOn = false;
+                    },
+                    child: Text('Run Model'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
