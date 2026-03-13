@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 
 class BoundingBoxesPaint extends CustomPainter {
   final List<Map<String, dynamic>> boxes;
-  final Size previewSize, modelSize;
+  final Size previewSize, modelSize, windowSize;
 
   BoundingBoxesPaint({
     required this.boxes,
     required this.previewSize,
+    required this.windowSize,
     this.modelSize = const Size(640, 640),
   });
 
@@ -17,8 +18,8 @@ class BoundingBoxesPaint extends CustomPainter {
       ..strokeWidth = 2
       ..color = Color(0xFF00FF00);
 
-    final scaleX = 360 / previewSize.width;
-    final scaleY = 540 / previewSize.height;
+    final scaleX = windowSize.width / previewSize.width;
+    final scaleY = windowSize.height / previewSize.height;
 
     for (var box in boxes) {
       final x1 = box['x1'] * scaleX;
