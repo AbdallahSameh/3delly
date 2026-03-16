@@ -30,6 +30,7 @@ class _CameraScreenState extends State<CameraScreen> {
   CameraService cameraService = CameraService();
   List<String> logs = [];
   int score = 0;
+  DateTime? lastPopTry;
 
   Future<void> initStorage() async {
     await storageService.init();
@@ -40,23 +41,17 @@ class _CameraScreenState extends State<CameraScreen> {
     });
   }
 
-  Future<void> initCamera() async {
-    await cameraService.initialize();
-  }
-
   @override
   void initState() {
     super.initState();
     yoloService = YoloService();
     initialized = yoloService.initializeModel();
-    initCamera();
     WakelockPlus.enable();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   @override
   void dispose() {
-    cameraService.dispose();
     WakelockPlus.disable();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
@@ -65,6 +60,29 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          return;
+        }
+
+        final now = DateTime.now();
+        if (lastPopTry == null ||
+            now.difference(lastPopTry!) > Duration(seconds: 2)) {
+          lastPopTry = now;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                "Press back again to exit",
+                style: TextStyle(color: Colors.white),
+              ),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        } else {
+          SystemNavigator.pop();
+        }
+      },
       child: Scaffold(
         appBar: AppBar(toolbarHeight: 40),
         drawer: LogsDrawer(
@@ -233,6 +251,9 @@ class _CameraScreenState extends State<CameraScreen> {
                             child: GoldenButton(
                               onPressed: () async {
                                 await initialized;
+                                if (cameraService.notInitialized()) {
+                                  return;
+                                }
                                 input = await cameraService.takePicture();
 
                                 final results = await yoloService.detectObjects(

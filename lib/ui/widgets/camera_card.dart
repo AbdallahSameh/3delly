@@ -25,16 +25,19 @@ class CameraCard extends StatefulWidget {
 }
 
 class _CameraCardState extends State<CameraCard> {
-  Size? previewSize;
+  late Future<void> cameraFuture;
   bool flashOn = false;
 
   @override
   void initState() {
     super.initState();
-    previewSize = Size(
-      widget.cameraService.controller!.value.previewSize!.height,
-      widget.cameraService.controller!.value.previewSize!.width,
-    );
+    cameraFuture = widget.cameraService.initialize();
+  }
+
+  @override
+  void dispose() {
+    widget.cameraService.dispose();
+    super.dispose();
   }
 
   @override
@@ -52,9 +55,14 @@ class _CameraCardState extends State<CameraCard> {
         padding: const EdgeInsets.fromLTRB(7.2, 10, 7.2, 12),
         child: Stack(
           children: [
-            widget.cameraService.notInitialized()
-                ? Center(child: CircularProgressIndicator())
-                : Positioned.fill(
+            FutureBuilder(
+              future: cameraFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return Positioned.fill(
                     child: ClipRRect(
                       borderRadius: BorderRadius.all(Radius.elliptical(32, 50)),
                       child: LayoutBuilder(
@@ -65,7 +73,20 @@ class _CameraCardState extends State<CameraCard> {
                                   image: widget.input,
                                   painter: BoundingBoxesPaint(
                                     boxes: widget.predictions,
-                                    previewSize: previewSize!,
+                                    previewSize: Size(
+                                      widget
+                                          .cameraService
+                                          .controller!
+                                          .value
+                                          .previewSize!
+                                          .height,
+                                      widget
+                                          .cameraService
+                                          .controller!
+                                          .value
+                                          .previewSize!
+                                          .width,
+                                    ),
                                     windowSize: Size(
                                       boxConstraints.maxWidth,
                                       boxConstraints.maxHeight,
@@ -75,7 +96,11 @@ class _CameraCardState extends State<CameraCard> {
                         },
                       ),
                     ),
-                  ),
+                  );
+                }
+                return Center(child: Text('No Camera'));
+              },
+            ),
 
             Align(
               alignment: Alignment.topRight,
