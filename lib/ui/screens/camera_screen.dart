@@ -46,8 +46,21 @@ class _CameraScreenState extends State<CameraScreen> {
     super.initState();
     yoloService = YoloService();
     initialized = yoloService.initializeModel();
+    initStorage();
     WakelockPlus.enable();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    precacheImage(
+      const AssetImage(
+        'assets/images/dark-brown-wood-texture-background-with-design-space(scaled_down).png',
+      ),
+      context,
+    );
   }
 
   @override
@@ -86,9 +99,20 @@ class _CameraScreenState extends State<CameraScreen> {
       child: Scaffold(
         appBar: AppBar(toolbarHeight: 40),
         drawer: LogsDrawer(
-          storageService: storageService,
           logs: logs,
           score: score,
+          onResetLogs: () {
+            storageService.resetLogs();
+            setState(() {
+              logs = storageService.getLogs();
+            });
+          },
+          onResetScore: () {
+            storageService.resetScore();
+            setState(() {
+              score = storageService.getScore();
+            });
+          },
         ),
         body: Container(
           decoration: BoxDecoration(
