@@ -97,7 +97,17 @@ class _CameraScreenState extends State<CameraScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(toolbarHeight: 40),
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          toolbarHeight: 60,
+          title: Text(
+            '3delly',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.transparent,
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
         drawer: LogsDrawer(
           logs: logs,
           score: score,
@@ -138,7 +148,7 @@ class _CameraScreenState extends State<CameraScreen> {
                   ),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.all(10.0),
+                      padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,

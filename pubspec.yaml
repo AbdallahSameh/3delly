@@ -16,11 +16,32 @@ dependencies:
   wakelock_plus: ^1.4.0
   path_provider: ^2.1.2
   shared_preferences: ^2.5.3
+  flutter_native_splash: ^2.4.7
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons: 
+  android: true
+  ios: true
+  image_path: assets\icons\icon_circular.png
+  adaptive_icon_background: "#ffffff"
+  remove_alpha_ios: true
+
+flutter_native_splash:
+  color: "#162218"
+  image: assets\icons\icon_circular.png
+  android: true
+  ios: true
+  fullscreen: true
+
+  android_12:
+    color: "#162218"
+    image: assets\icons\icon_circular.png
+    icon_background_color: "#162218"
 
 flutter:
   uses-material-design: true

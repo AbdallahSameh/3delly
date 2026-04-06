@@ -46,17 +46,39 @@ class LogsDrawer extends StatelessWidget {
               flex: 4,
               child: ListView.separated(
                 itemCount: logs.length,
-                separatorBuilder: (index, context) => SizedBox(height: 10),
+                separatorBuilder: (index, context) => SizedBox(height: 13),
                 itemBuilder: (context, index) {
                   Log item = Log.fromJson(jsonDecode(logs[index]));
-                  return ListTile(
-                    title: Text(
-                      item.count.toString(),
-                      style: TextStyle(color: Colors.white),
+                  return Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          offset: Offset(1, 1),
+                          blurRadius: 4,
+                          spreadRadius: 0,
+                        ),
+                      ],
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFFf9e6c0),
+                          Color(0xffdfc38d),
+                          Color(0xffa6814f),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    trailing: Text(
-                      '${item.time.hour % 12 == 0 ? 12 : item.time.hour % 12}:${item.time.minute.toString().padLeft(2, '0')} ${item.time.hour >= 12 ? 'PM' : 'AM'}',
-                      style: TextStyle(color: Colors.white, fontSize: 11),
+                    child: ListTile(
+                      dense: true,
+                      title: Text(
+                        item.count.toString(),
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      trailing: Text(
+                        '${item.time.hour % 12 == 0 ? 12 : item.time.hour % 12}:${item.time.minute.toString().padLeft(2, '0')} ${item.time.hour >= 12 ? 'PM' : 'AM'}',
+                        style: TextStyle(color: Colors.black, fontSize: 11),
+                      ),
                     ),
                   );
                 },
